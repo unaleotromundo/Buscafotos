@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador Masivo de Fotos - Conectando Cuentas</title>
+    <!-- Cargamos la librería oficial de Supabase desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -49,6 +50,7 @@
             <p style="color: var(--texto-secundario); margin: 0;">Conectando múltiples cuentas en simultáneo</p>
         </header>
 
+        <!-- Panel de Gestión de Cuentas -->
         <section class="cuentas-panel">
             <span style="font-weight: bold; font-size: 14px;">Tus cuentas vinculadas:</span>
             <div class="cuentas-lista" id="listaCuentas">
@@ -59,51 +61,48 @@
             </div>
         </section>
 
+        <!-- Barra de Búsqueda -->
         <section class="search-box">
             <input type="text" id="inputBusqueda" placeholder="Ej: Recibos, Plantas, Vacaciones...">
             <button class="btn-buscar" onclick="buscarEnTodo()">Buscar Simultáneo</button>
         </section>
 
+        <!-- Grilla de Fotos -->
         <main class="galeria-grid" id="galeria"></main>
     </div>
 
+    <!-- 1. Cargamos el archivo externo que creaste con las llaves -->
+    <script src="config.js"></script>
+
+    <!-- 2. Lógica de la aplicación -->
     <script>
-        // CONFIGURACIÓN DE TU PROYECTO (Reemplazar con tus datos reales)
-const SUPABASE_URL = "TU_SUPABASE_URL_AQUÍ"; 
-const SUPABASE_ANON_KEY = "TU_SUPABASE_ANON_KEY_AQUÍ";
+        // Inicializamos el cliente de Supabase una SOLA VEZ usando el archivo CONFIG externo
+        const supabaseClient = supabase.createClient(CONFIG.URL, CONFIG.KEY);
 
-        // Inicializamos el cliente de Supabase
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // FUNCIÓN 1: Disparar el login de Google pidiendo acceso a Fotos
+        // Función para conectar una nueva cuenta con el scope de Google Fotos
         async function vincularNuevaCuenta() {
-            const { data, error } = await supabase.auth.signInWithOAuth({
+            const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    // El truco que repara lo del panel: pasamos el scope directamente acá
                     scopes: 'https://www.googleapis.com/auth/photoslibrary.readonly',
-                    redirectTo: window.location.href // Vuelve a esta misma página al terminar
+                    redirectTo: window.location.href
                 }
             });
 
             if (error) console.error("Error al conectar cuenta:", error.message);
         }
 
-        // FUNCIÓN 2: Al cargar la página, verificamos si venimos del login exitoso
+        // Verificamos si la página carga viniendo del inicio de sesión de Google
         async function verificarRetorno() {
-            const { data: { session }, error } = await supabase.auth.getSession();
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
             
             if (session) {
-                console.log("Usuario logueado con éxito!");
-                console.log("Datos de la sesión:", session);
+                console.log("¡Usuario logueado con éxito!", session);
                 
-                // Acá ya tenemos el Access Token de la cuenta que se acaba de loguear
-                const providerToken = session.provider_token; 
                 const correoUsuario = session.user.email;
-
-                // TODO: Mañana enviaremos este token a nuestra base de datos para guardarlo permanentemente
                 const lista = document.getElementById('listaCuentas');
                 const sinCuentas = document.getElementById('sinCuentas');
+                
                 if(sinCuentas) sinCuentas.remove();
 
                 lista.innerHTML += `
@@ -116,10 +115,10 @@ const SUPABASE_ANON_KEY = "TU_SUPABASE_ANON_KEY_AQUÍ";
         }
 
         function buscarEnTodo() {
-            alert("¡Estructura lista! Mañana conectamos la Edge Function para disparar la búsqueda en paralelo.");
+            alert("¡Estructura lista! Próximo paso: conectar la Edge Function para disparar la búsqueda en paralelo.");
         }
 
-        // Ejecutar verificación al arrancar
+        // Arrancamos la verificación de sesión al cargar la web
         verificarRetorno();
     </script>
 </body>
