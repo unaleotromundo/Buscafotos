@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador Masivo de Fotos - Conectando Cuentas</title>
-    <!-- Cargamos la librería oficial de Supabase desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -49,7 +48,6 @@
             <p style="color: var(--texto-secundario); margin: 0;">Conectando múltiples cuentas en simultáneo</p>
         </header>
 
-        <!-- Panel de Gestión de Cuentas -->
         <section class="cuentas-panel">
             <span style="font-weight: bold; font-size: 14px;">Tus cuentas vinculadas:</span>
             <div class="cuentas-lista" id="listaCuentas">
@@ -60,23 +58,23 @@
             </div>
         </section>
 
-        <!-- Barra de Búsqueda -->
         <section class="search-box">
             <input type="text" id="inputBusqueda" placeholder="Ej: Recibos, Plantas, Vacaciones...">
             <button class="btn-buscar" onclick="buscarEnTodo()">Buscar Simultáneo</button>
         </section>
 
-        <!-- Grilla de Fotos -->
         <main class="galeria-grid" id="galeria"></main>
     </div>
 
-    <!-- Lógica de la aplicación -->
     <script>
+        // Claves de conexión con Supabase
         const SUPABASE_URL = "https://pmodvqgcoxdyvtixmohl.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtb2R2cWdjb3hkeXZ0aXhtb2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MzA3MjcsImV4cCI6MjA5NjQwNjcyN30.YAGJnE8ZQZ6k-omXLkQQTLj_m3GbJVimiKVN_TWkOuA";
 
+        // Inicializamos el cliente de Supabase
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Función para conectar una nueva cuenta con el scope de Google Fotos
         async function vincularNuevaCuenta() {
             const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
@@ -88,9 +86,12 @@
             if (error) console.error("Error al conectar cuenta:", error.message);
         }
 
+        // Verificamos si la página carga viniendo del inicio de sesión de Google
         async function verificarRetorno() {
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             if (session) {
+                console.log("¡Usuario logueado con éxito!", session);
+                
                 const correoUsuario = session.user.email;
                 const lista = document.getElementById('listaCuentas');
                 const sinCuentas = document.getElementById('sinCuentas');
@@ -105,7 +106,7 @@
             }
         }
 
-        // Llama a la función de Base de Datos sin pasar por consolas de Windows
+        // Función principal que despierta el motor RPC de la base de datos web
         async function buscarEnTodo() {
             const query = document.getElementById('inputBusqueda').value.trim();
             if (!query) return alert("Escribí algo primero, Ale.");
@@ -114,7 +115,7 @@
             galeria.innerHTML = '<p style="color: var(--primario);">Buscando en todas tus cuentas en paralelo...</p>';
 
             try {
-                // Invocamos de manera segura la función RPC remota
+                // Invocamos de manera segura la función que diste "Success" en el panel web
                 const { data, error } = await supabaseClient.rpc('buscar_fotos_remoto', { 
                     termino_busqueda: query 
                 });
@@ -123,11 +124,12 @@
 
                 galeria.innerHTML = '';
 
-                if (!data.fotos || data.fotos.length === 0) {
+                if (!data || !data.fotos || data.fotos.length === 0) {
                     galeria.innerHTML = '<p style="color: var(--texto-secundario);">No se encontró ninguna foto con ese nombre.</p>';
                     return;
                 }
 
+                // Dibujamos cada foto en la grilla armando las tarjetas dinámicamente
                 data.fotos.forEach(foto => {
                     galeria.innerHTML += `
                         <div class="foto-card">
@@ -147,10 +149,11 @@
 
             } catch (error) {
                 console.error("Error al buscar:", error);
-                galeria.innerHTML = `<p style="color: var(--danger);">Hubo un error al buscar: ${error.message}</p>';
+                galeria.innerHTML = `<p style="color: var(--danger);">Hubo un error al buscar: ${error.message || error}</p>`;
             }
         }
 
+        // Arrancamos la verificación de sesión al cargar la web
         verificarRetorno();
     </script>
 </body>
