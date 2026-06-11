@@ -2,7 +2,7 @@
  * Web Auditor - Main Application Controller
  */
 
-import { auditHTML } from './modules/parser.js';
+import { auditHTML, generateOptimizedHTML } from './modules/parser.js';
 import { runDeepAIAudit } from './modules/ai.js';
 import { prioritizeIssues, getImpactColor, getEffortColor } from './modules/roadmap.js';
 
@@ -12,6 +12,7 @@ let auditResult = null;
 let roadmapData = null;
 let doneIssues = new Set();
 let apiKey = '';
+let optimizedHTML = '';
 
 // --- DOM Elements ---
 const dropZone = document.getElementById('drop-zone');
@@ -84,6 +85,12 @@ const printUxStatus = document.getElementById('print-ux-status');
 const printGlobalScore = document.getElementById('print-global-score');
 const printGlobalEvaluation = document.getElementById('print-global-evaluation');
 const printIssuesContainer = document.getElementById('print-issues-container');
+
+// Optimized HTML references
+const optimizedImprovementsSummary = document.getElementById('optimized-improvements-summary');
+const copyOptimizedBtn = document.getElementById('copy-optimized-btn');
+const downloadOptimizedBtn = document.getElementById('download-optimized-btn');
+const optimizedCodeBlock = document.getElementById('optimized-code-block');
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -226,6 +233,36 @@ function setupEventListeners() {
     downloadAnchor.click();
     downloadAnchor.remove();
   });
+
+  // Copy Optimized HTML
+  copyOptimizedBtn.addEventListener('click', () => {
+    if (!optimizedHTML) return;
+    navigator.clipboard.writeText(optimizedHTML)
+      .then(() => {
+        const originalText = copyOptimizedBtn.innerHTML;
+        copyOptimizedBtn.textContent = '¡Copiado!';
+        setTimeout(() => {
+          copyOptimizedBtn.innerHTML = originalText;
+        }, 2000);
+      })
+      .catch(err => {
+        console.error('Error al copiar el código:', err);
+      });
+  });
+
+  // Download Optimized HTML
+  downloadOptimizedBtn.addEventListener('click', () => {
+    if (!optimizedHTML) return;
+    const blob = new Blob([optimizedHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', url);
+    downloadAnchor.setAttribute('download', 'index_optimizado.html');
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    URL.revokeObjectURL(url);
+  });
 }
 
 // --- Helper: Read Uploaded File ---
@@ -255,6 +292,10 @@ async function triggerAudit(htmlString) {
     await delay(600); // Small delay to feel realistic and let CSS render loader
     const localResult = auditHTML(htmlString);
     auditResult = localResult;
+
+    // 2.5 Generate Optimized HTML
+    const optResult = generateOptimizedHTML(htmlString);
+    optimizedHTML = optResult.html;
 
     // 3. Optional AI deep audit
     if (apiKey) {
@@ -303,6 +344,7 @@ async function triggerAudit(htmlString) {
     renderIssues();
     renderRoadmap();
     renderTechRecs();
+    renderOptimizedHTML(optResult.improvements);
 
     // 6. Show results
     loadingSpinner.style.display = 'none';
@@ -651,4 +693,25 @@ function getGlobalEvaluationLabel(score) {
   if (score >= 70) return 'Cumple con estándares básicos. Hay oportunidades de optimización sencillas.';
   if (score >= 50) return 'El sitio presenta problemas importantes que reducen conversiones y visibilidad.';
   return 'Estado crítico. Se requiere reestructuración técnica urgente.';
+}
+
+function renderOptimizedHTML(improvements) {
+  optimizedCodeBlock.innerHTML = escapeHTML(optimizedHTML);
+  
+  optimizedImprovementsSummary.innerHTML = '';
+  improvements.forEach((imp, index) => {
+    const card = document.createElement('div');
+    card.className = 'category-card';
+    card.style.flexDirection = 'column';
+    card.style.alignItems = 'flex-start';
+    card.style.background = 'rgba(255, 255, 255, 0.01)';
+    card.style.border = '1px solid rgba(255, 255, 255, 0.05)';
+    card.style.padding = '1.25rem';
+    
+    card.innerHTML = `
+      <h4 style="font-size:0.95rem; margin-bottom:0.4rem; color:var(--color-primary);">${index + 1}. ${escapeHTML(imp.title)}</h4>
+      <p style="font-size:0.8rem; color:var(--color-text-muted); line-height:1.4;">${escapeHTML(imp.desc)}</p>
+    `;
+    optimizedImprovementsSummary.appendChild(card);
+  });
 }

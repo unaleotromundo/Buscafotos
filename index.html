@@ -201,6 +201,7 @@
           <button class="tab-btn active" data-tab="tab-list">Lista de Problemas</button>
           <button class="tab-btn" data-tab="tab-roadmap">Roadmap Priorizado</button>
           <button class="tab-btn" data-tab="tab-tech">Sugerencias Técnicas</button>
+          <button class="tab-btn" data-tab="tab-optimized">HTML Optimizado</button>
         </div>
 
         <!-- TAB 1: Issues List -->
@@ -284,6 +285,37 @@
           </div>
           <div class="tech-rec-list" id="tech-rec-list-container">
             <!-- Dynamic tech suggestions go here -->
+          </div>
+        </div>
+
+        <!-- TAB 4: Optimized HTML -->
+        <div class="tab-pane" id="tab-optimized">
+          <div class="tech-rec-summary card">
+            <h3>Generador de HTML Optimizado</h3>
+            <p style="color: var(--color-text-muted); margin-top: 0.5rem;">Hemos aplicado automáticamente las 3 mejoras fundamentales a tu código HTML para optimizar el SEO móvil, acelerar la velocidad de renderizado y solucionar barreras de accesibilidad.</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2rem; text-align: left;" id="optimized-improvements-summary">
+              <!-- Dynamically populated card summaries -->
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+              <button class="btn btn-secondary" id="copy-optimized-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copiar Código
+              </button>
+              <button class="btn btn-primary" id="download-optimized-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Descargar HTML Corregido
+              </button>
+            </div>
+          </div>
+
+          <div class="code-editor-card" style="margin-top: 1.5rem;">
+            <div class="editor-header after">
+              <span><span class="dot"></span> index_optimizado.html</span>
+              <span>HTML</span>
+            </div>
+            <pre><code id="optimized-code-block"><!-- Dynamic optimized code --></code></pre>
           </div>
         </div>
       </section>

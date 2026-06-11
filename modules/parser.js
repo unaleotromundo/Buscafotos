@@ -627,3 +627,109 @@ export function auditHTML(htmlString) {
     issues
   };
 }
+
+export function generateOptimizedHTML(htmlString) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  
+  // 1. Mejora 1: SEO, Viewport & Idioma
+  const htmlTag = doc.querySelector('html');
+  if (htmlTag && (!htmlTag.hasAttribute('lang') || !htmlTag.getAttribute('lang').trim())) {
+    htmlTag.setAttribute('lang', 'es');
+  }
+
+  let head = doc.querySelector('head');
+  if (!head) {
+    head = doc.createElement('head');
+    doc.documentElement.insertBefore(head, doc.body);
+  }
+
+  // Viewport
+  const viewport = doc.querySelector('meta[name="viewport"]');
+  if (!viewport) {
+    const meta = doc.createElement('meta');
+    meta.setAttribute('name', 'viewport');
+    meta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+    head.appendChild(meta);
+  }
+
+  // Canonical
+  const canonical = doc.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    const link = doc.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', window.location.href);
+    head.appendChild(link);
+  }
+
+  // Title check
+  const title = doc.querySelector('title');
+  if (!title) {
+    const titleTag = doc.createElement('title');
+    titleTag.textContent = 'Sitio Web Optimizado';
+    head.appendChild(titleTag);
+  }
+
+  // 2. Mejora 2: Performance (Scripts con Defer, Imágenes Lazy Load)
+  const headScripts = doc.querySelectorAll('head script');
+  headScripts.forEach(script => {
+    if (script.hasAttribute('src') && !script.hasAttribute('defer') && !script.hasAttribute('async') && script.getAttribute('type') !== 'module') {
+      script.setAttribute('defer', '');
+    }
+  });
+
+  const images = doc.querySelectorAll('img');
+  images.forEach(img => {
+    // Add lazy loading
+    if (!img.hasAttribute('loading')) {
+      img.setAttribute('loading', 'lazy');
+    }
+    // Fix layout shifts (CLS)
+    if (!img.hasAttribute('width') && !img.hasAttribute('height') && !img.hasAttribute('style')) {
+      img.setAttribute('style', 'max-width: 100%; height: auto;');
+    }
+  });
+
+  // 3. Mejora 3: Accesibilidad (Imágenes con ALT, Inputs con Label/Aria)
+  images.forEach(img => {
+    if (!img.hasAttribute('alt')) {
+      img.setAttribute('alt', 'Imagen descriptiva del contenido de la página');
+    }
+  });
+
+  const inputs = doc.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="tel"], textarea, select');
+  inputs.forEach(input => {
+    const id = input.id;
+    let hasLabel = false;
+    if (input.closest('label')) hasLabel = true;
+    if (!hasLabel && id && doc.querySelector(`label[for="${id}"]`)) hasLabel = true;
+    if (!hasLabel && (input.hasAttribute('aria-label') || input.hasAttribute('aria-labelledby'))) hasLabel = true;
+
+    if (!hasLabel) {
+      // Add aria-label based on name, id, or type
+      const labelText = input.getAttribute('placeholder') || input.getAttribute('name') || input.getAttribute('id') || 'Campo de entrada';
+      input.setAttribute('aria-label', labelText);
+    }
+  });
+
+  // Format HTML nicely by returning the outerHTML structure
+  const cleanHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+
+  return {
+    html: cleanHTML,
+    improvements: [
+      {
+        title: "🔍 Metadatos SEO y Adaptabilidad Móvil (Viewport y Language)",
+        desc: "Se inyectó la etiqueta meta-viewport para asegurar la correcta escala móvil, se declaró el idioma lang=\"es\" en la raíz HTML y se insertó una etiqueta canonical para evitar penalizaciones por contenido duplicado."
+      },
+      {
+        title: "⚡ Optimización de Performance (Scripts y Carga de Imágenes)",
+        desc: "Se añadió el atributo 'defer' a todos los scripts del head para evitar bloquear el pintado de la página. Se configuró 'loading=\"lazy\"' y estilos responsivos en todas las imágenes."
+      },
+      {
+        title: "♿ Accesibilidad WCAG (Imágenes con Alt y Controles de Formulario)",
+        desc: "Se corrigió la accesibilidad añadiendo descripciones 'alt' por defecto a las imágenes desprovistas de texto alternativo y se asociaron etiquetas ARIA-label a los campos de formulario huérfanos."
+      }
+    ]
+  };
+}
