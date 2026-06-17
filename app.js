@@ -75,8 +75,14 @@ let supabaseClient = null;
 const SupabaseManager = {
     // Check credentials and initialize client
     init() {
-        const url = localStorage.getItem('supabase_url');
-        const key = localStorage.getItem('supabase_key');
+        let url = localStorage.getItem('supabase_url');
+        let key = localStorage.getItem('supabase_key');
+        
+        // Fallback to user's hardcoded Supabase credentials if localStorage is empty
+        if (!url || !key) {
+            url = 'https://cbuyveosuyxwzwanktlt.supabase.co';
+            key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNidXl2ZW9zdXl4d3p3YW5rdGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NDc3NDQsImV4cCI6MjA5NzIyMzc0NH0.JZSYQJXNZ2aSi3kmopQ8oYq-vKHyUgICyO_1rv_5Uu4';
+        }
         
         if (url && key) {
             try {
@@ -979,9 +985,9 @@ async function handleDeleteItem() {
    SETTINGS MODAL CONTROLLER & ACTION HANDLERS
    ========================================================================== */
 function openSettingsModal() {
-    // Fill inputs with current values
-    DOM.sbUrlInput.value = localStorage.getItem('supabase_url') || '';
-    DOM.sbKeyInput.value = localStorage.getItem('supabase_key') || '';
+    // Fill inputs with current values, fallback to hardcoded default values
+    DOM.sbUrlInput.value = localStorage.getItem('supabase_url') || 'https://cbuyveosuyxwzwanktlt.supabase.co';
+    DOM.sbKeyInput.value = localStorage.getItem('supabase_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNidXl2ZW9zdXl4d3p3YW5rdGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NDc3NDQsImV4cCI6MjA5NzIyMzc0NH0.JZSYQJXNZ2aSi3kmopQ8oYq-vKHyUgICyO_1rv_5Uu4';
     
     DOM.settingsConnStatus.style.display = 'none';
     DOM.settingsModal.classList.add('active');
