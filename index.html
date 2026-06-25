@@ -377,36 +377,16 @@
 
                 <!-- AI Tab -->
                 <div class="settings-tab-content" id="tab-ai">
-                    <p class="settings-intro">Configura el chat con IA para analizar tu inventario y responder preguntas. La generación de imágenes funciona automáticamente sin configuración (Pollinations.ai).</p>
+                    <p class="settings-intro">Los agentes de IA funcionan automáticamente sin configuración. Usa servicios gratuitos para generar imágenes y chat con IA.</p>
                     
-                    <form id="ai-settings-form">
-                        <div class="form-group">
-                            <label for="huggingface-key">Hugging Face API Key (Opcional - para chat)</label>
-                            <input type="password" id="huggingface-key" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-                        </div>
-                        
-                        <div class="settings-status-box" id="ai-conn-status" style="display: none;">
-                            <span class="status-msg">Verificando...</span>
-                        </div>
-
-                        <div class="settings-actions">
-                            <button type="button" class="action-btn secondary-btn" id="btn-test-ai">
-                                <i class="fa-solid fa-plug"></i> Probar Conexión
-                            </button>
-                            <button type="submit" class="action-btn primary-btn" id="btn-save-ai">
-                                <i class="fa-solid fa-check"></i> Guardar Configuración
-                            </button>
-                        </div>
-                    </form>
-
                     <div class="settings-help">
-                        <h4>¿Cómo configurar?</h4>
-                        <ol>
-                            <li><strong>Imágenes:</strong> Funcionan automáticamente sin configurar nada (Pollinations.ai gratuito).</li>
-                            <li><strong>Chat:</strong> Opcional. Crea cuenta en <<a href="https://huggingface.co" target="_blank">huggingface.co</a>.</li>
-                            <li>Ve a <strong>Settings -> Access Tokens</strong> y crea un token.</li>
-                            <li>Copia el token (empieza con "hf_") para habilitar el chat.</li>
-                        </ol>
+                        <h4>Funcionalidades disponibles:</h4>
+                        <ul>
+                            <li><strong>Imágenes:</strong> Pollinations.ai - Generación de imágenes gratuita sin configuración.</li>
+                            <li><strong>Chat:</strong> Pollinations AI - Asistente de IA gratuito para analizar inventario y responder preguntas.</li>
+                            <li><strong>Análisis:</strong> El asistente puede analizar tus archivos guardados y dar recomendaciones.</li>
+                        </ul>
+                        <p style="margin-top: 12px; color: var(--color-sucu);">✓ Todo funciona automáticamente, no requiere API keys ni configuración.</p>
                     </div>
                 </div>
             </div>
