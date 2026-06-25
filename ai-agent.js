@@ -124,13 +124,23 @@ const AIAgentManager = {
                 throw new Error('Chat completion failed');
             }
 
-            const data = await response.json();
-            const message = data.response || data.message || data.text || 'No response';
+            const text = await response.text();
             
-            return {
-                success: true,
-                message: message.trim()
-            };
+            // Try to parse as JSON first
+            try {
+                const data = JSON.parse(text);
+                const message = data.response || data.message || data.text || data.content || 'No response';
+                return {
+                    success: true,
+                    message: message.trim()
+                };
+            } catch {
+                // If not JSON, use the text directly
+                return {
+                    success: true,
+                    message: text.trim()
+                };
+            }
         } catch (err) {
             console.error('Chat completion failed:', err);
             throw err;

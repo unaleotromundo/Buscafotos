@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupEventListeners();
     } catch (error) {
         console.error('Error al iniciar la aplicación:', error);
-        alert('Hubo un error al iniciar el almacenamiento. Revisa la consola para más detalles.');
+        alert(`Error al iniciar la aplicación: ${error.message}\n\nRevisa la consola para más detalles.`);
     }
 });
 
