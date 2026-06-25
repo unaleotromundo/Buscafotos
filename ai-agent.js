@@ -97,39 +97,33 @@ const AIAgentManager = {
         }
     },
 
-    // Chat completion using Mistral-7B
+    // Chat completion using free API (no API key required)
     async chat(userMessage, context = null) {
-        if (!this.isConfigured) {
-            throw new Error('AI Agent not configured. Please add your Hugging Face API key in settings.');
-        }
-
         try {
             const systemPrompt = this.getSystemPrompt(context);
-            const fullPrompt = `<s>[INST] ${systemPrompt} [/INST]\nUser: ${userMessage}\nAssistant:`;
+            const fullPrompt = `${systemPrompt}\n\nUser: ${userMessage}\nAssistant:`;
 
-            const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
+            // Using free API from Pollinations (text generation)
+            const response = await fetch('https://text.pollinations.ai/', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    inputs: fullPrompt,
-                    parameters: {
-                        max_new_tokens: 1000,
-                        temperature: 0.7,
-                        return_full_text: false
-                    }
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userMessage }
+                    ],
+                    seed: Math.floor(Math.random() * 1000)
                 })
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Chat completion failed');
+                throw new Error('Chat completion failed');
             }
 
             const data = await response.json();
-            const message = Array.isArray(data) ? data[0].generated_text : data.generated_text;
+            const message = data.response || data.message || data.text || 'No response';
             
             return {
                 success: true,
