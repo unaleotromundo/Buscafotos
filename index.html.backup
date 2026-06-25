@@ -63,10 +63,7 @@
                     <span class="status-dot"></span>
                     <span class="status-text">Local (IndexedDB)</span>
                 </span>
-                <button class="ai-chat-trigger-btn" id="btn-open-ai-chat" title="Chat con Agente IA">
-                    <i class="fa-solid fa-robot"></i>
-                </button>
-                <button class="settings-trigger-btn" id="btn-open-settings" title="Configurar Servicios">
+                <button class="settings-trigger-btn" id="btn-open-settings" title="Configurar Supabase Cloud">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
@@ -201,11 +198,6 @@
                             <!-- Right Column: Drag and Drop Uploader -->
                             <div class="form-column flex-column">
                                 <label>Archivo / Imagen *</label>
-                                <div class="ai-generate-section">
-                                    <button type="button" class="ai-generate-btn" id="btn-ai-generate" title="Generar imagen con IA">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generar con IA
-                                    </button>
-                                </div>
                                 <div class="drag-drop-zone" id="drag-drop-zone">
                                     <input type="file" id="item-file" class="file-input" required>
                                     <div class="uploader-content">
@@ -317,27 +309,18 @@
             </button>
             
             <div class="settings-container">
-                <h2><i class="fa-solid fa-cloud-arrow-up-from-bracket"></i> Configurar Servicios</h2>
+                <h2><i class="fa-solid fa-cloud-arrow-up-from-bracket"></i> Configurar Supabase Cloud</h2>
+                <p class="settings-intro">Conecta tu inventario a Supabase para sincronizar tus flyers y fotos en la nube. Si no lo configuras, tus archivos se guardarán localmente en este navegador.</p>
                 
-                <!-- Tabs for different services -->
-                <div class="settings-tabs">
-                    <button class="settings-tab active" data-tab="supabase">Supabase</button>
-                    <button class="settings-tab" data-tab="ai">Agentes IA</button>
-                </div>
-
-                <!-- Supabase Tab -->
-                <div class="settings-tab-content active" id="tab-supabase">
-                    <p class="settings-intro">Conecta tu inventario a Supabase para sincronizar tus flyers y fotos en la nube. Si no lo configuras, tus archivos se guardarán localmente en este navegador.</p>
-                    
-                    <form id="settings-form">
-                        <div class="form-group">
-                            <label for="sb-url">Supabase Project URL</label>
-                            <input type="url" id="sb-url" placeholder="https://xxxxxxxxxxxxxx.supabase.co">
-                        </div>
-                        <div class="form-group">
-                            <label for="sb-key">Supabase API Anon Key</label>
-                            <input type="password" id="sb-key" placeholder="Pega tu clave anon key aquí...">
-                        </div>
+                <form id="settings-form">
+                    <div class="form-group">
+                        <label for="sb-url">Supabase Project URL</label>
+                        <input type="url" id="sb-url" placeholder="https://xxxxxxxxxxxxxx.supabase.co">
+                    </div>
+                    <div class="form-group">
+                        <label for="sb-key">Supabase API Anon Key</label>
+                        <input type="password" id="sb-key" placeholder="Pega tu clave anon key aquí...">
+                    </div>
                     
                     <div class="settings-status-box" id="settings-conn-status" style="display: none;">
                         <span class="status-msg">Verificando...</span>
@@ -371,106 +354,11 @@
                         <li>Crea un Bucket de Storage público llamado <code>inventario-files</code>.</li>
                     </ol>
                 </div>
-                </div>
-
-                <!-- AI Tab -->
-                <div class="settings-tab-content" id="tab-ai">
-                    <p class="settings-intro">Configura los agentes de IA para generar imágenes, responder preguntas y analizar tu inventario. Usa OpenAI GPT-4 para chat y DALL-E 3 para imágenes.</p>
-                    
-                    <form id="ai-settings-form">
-                        <div class="form-group">
-                            <label for="openai-key">OpenAI API Key</label>
-                            <input type="password" id="openai-key" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx">
-                        </div>
-                        
-                        <div class="settings-status-box" id="ai-conn-status" style="display: none;">
-                            <span class="status-msg">Verificando...</span>
-                        </div>
-
-                        <div class="settings-actions">
-                            <button type="button" class="action-btn secondary-btn" id="btn-test-ai">
-                                <i class="fa-solid fa-plug"></i> Probar Conexión
-                            </button>
-                            <button type="submit" class="action-btn primary-btn" id="btn-save-ai">
-                                <i class="fa-solid fa-check"></i> Guardar Configuración
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="settings-help">
-                        <h4>¿Cómo configurar?</h4>
-                        <ol>
-                            <li>Crea una cuenta en <a href="https://platform.openai.com" target="_blank">platform.openai.com</a>.</li>
-                            <li>Ve a <strong>API Keys -> Create new secret key</strong> y copia la clave.</li>
-                            <li>La misma clave sirve para GPT-4 (chat) y DALL-E 3 (imágenes).</li>
-                            <li>Costo aproximado: $0.03/1K tokens (chat), $0.04/imagen (DALL-E 3).</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI CHAT MODAL -->
-    <div class="modal" id="ai-chat-modal">
-        <div class="modal-overlay" id="ai-chat-overlay"></div>
-        <div class="ai-chat-content-wrapper glass-card">
-            <button class="modal-close-btn" id="ai-chat-close-btn">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            
-            <div class="ai-chat-container">
-                <div class="ai-chat-header">
-                    <h2><i class="fa-solid fa-robot"></i> Asistente IA</h2>
-                    <div class="ai-chat-status" id="ai-chat-status">
-                        <span class="status-dot"></span>
-                        <span class="status-text">Desconectado</span>
-                    </div>
-                </div>
-
-                <div class="ai-chat-messages" id="ai-chat-messages">
-                    <div class="chat-message ai-message">
-                        <div class="message-avatar">
-                            <i class="fa-solid fa-robot"></i>
-                        </div>
-                        <div class="message-content">
-                            <p>¡Hola! Soy tu asistente de IA. Puedo ayudarte a:</p>
-                            <ul>
-                                <li>Generar imágenes y flyers para tus emprendimientos</li>
-                                <li>Analizar tu inventario y darte recomendaciones</li>
-                                <li>Responder preguntas sobre tus archivos guardados</li>
-                                <li>Crear contenido promocional</li>
-                            </ul>
-                            <p>Configura tu API Key de OpenAI en Configuración > Agentes IA para comenzar.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ai-chat-input-area">
-                    <div class="chat-quick-actions">
-                        <button class="quick-action-btn" data-action="analyze">
-                            <i class="fa-solid fa-chart-line"></i> Analizar Inventario
-                        </button>
-                        <button class="quick-action-btn" data-action="generate-flyer">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Generar Flyer
-                        </button>
-                        <button class="quick-action-btn" data-action="generate-image">
-                            <i class="fa-solid fa-image"></i> Generar Imagen
-                        </button>
-                    </div>
-                    <form id="ai-chat-form" class="chat-form">
-                        <input type="text" id="ai-chat-input" placeholder="Escribe tu mensaje aquí..." autocomplete="off">
-                        <button type="submit" class="send-btn" id="ai-chat-send">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
 
     <!-- Application Script -->
-    <script src="ai-agent.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
