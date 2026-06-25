@@ -377,12 +377,12 @@
 
                 <!-- AI Tab -->
                 <div class="settings-tab-content" id="tab-ai">
-                    <p class="settings-intro">Configura los agentes de IA para generar imágenes, responder preguntas y analizar tu inventario. Usa OpenAI GPT-4 para chat y DALL-E 3 para imágenes.</p>
+                    <p class="settings-intro">Configura el chat con IA para analizar tu inventario y responder preguntas. La generación de imágenes funciona automáticamente sin configuración (Pollinations.ai).</p>
                     
                     <form id="ai-settings-form">
                         <div class="form-group">
-                            <label for="openai-key">OpenAI API Key</label>
-                            <input type="password" id="openai-key" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx">
+                            <label for="huggingface-key">Hugging Face API Key (Opcional - para chat)</label>
+                            <input type="password" id="huggingface-key" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
                         </div>
                         
                         <div class="settings-status-box" id="ai-conn-status" style="display: none;">
@@ -402,10 +402,10 @@
                     <div class="settings-help">
                         <h4>¿Cómo configurar?</h4>
                         <ol>
-                            <li>Crea una cuenta en <a href="https://platform.openai.com" target="_blank">platform.openai.com</a>.</li>
-                            <li>Ve a <strong>API Keys -> Create new secret key</strong> y copia la clave.</li>
-                            <li>La misma clave sirve para GPT-4 (chat) y DALL-E 3 (imágenes).</li>
-                            <li>Costo aproximado: $0.03/1K tokens (chat), $0.04/imagen (DALL-E 3).</li>
+                            <li><strong>Imágenes:</strong> Funcionan automáticamente sin configurar nada (Pollinations.ai gratuito).</li>
+                            <li><strong>Chat:</strong> Opcional. Crea cuenta en <<a href="https://huggingface.co" target="_blank">huggingface.co</a>.</li>
+                            <li>Ve a <strong>Settings -> Access Tokens</strong> y crea un token.</li>
+                            <li>Copia el token (empieza con "hf_") para habilitar el chat.</li>
                         </ol>
                     </div>
                 </div>
@@ -443,7 +443,7 @@
                                 <li>Responder preguntas sobre tus archivos guardados</li>
                                 <li>Crear contenido promocional</li>
                             </ul>
-                            <p>Configura tu API Key de OpenAI en Configuración > Agentes IA para comenzar.</p>
+                            <p>Configura tu API Key de Hugging Face en Configuración > Agentes IA para comenzar.</p>
                         </div>
                     </div>
                 </div>

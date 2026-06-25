@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AI AGENT MANAGER - OpenAI Integration
+   AI AGENT MANAGER - Hugging Face Integration (Free Models)
    ========================================================================== */
 const AIAgentManager = {
     apiKey: null,
@@ -7,80 +7,70 @@ const AIAgentManager = {
 
     // Initialize AI Agent with API key from localStorage
     init() {
-        this.apiKey = localStorage.getItem('openai_key');
+        this.apiKey = localStorage.getItem('huggingface_key');
         this.isConfigured = !!this.apiKey;
+        // Image generation doesn't require API key (uses Pollinations.ai)
+        this.canGenerateImages = true; 
         return this.isConfigured;
     },
 
     // Save API key to localStorage
     saveApiKey(key) {
-        localStorage.setItem('openai_key', key);
+        localStorage.setItem('huggingface_key', key);
         this.apiKey = key;
         this.isConfigured = true;
     },
 
-    // Test connection to OpenAI API
+    // Test connection to Hugging Face API
     async testConnection() {
         if (!this.apiKey) {
             return { success: false, error: 'No API key configured' };
         }
 
         try {
-            const response = await fetch('https://api.openai.com/v1/models', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error?.message || 'Connection failed');
-            }
-
-            return { success: true };
-        } catch (err) {
-            console.error('OpenAI connection test failed:', err);
-            return { success: false, error: err.message };
-        }
-    },
-
-    // Generate image using DALL-E 3
-    async generateImage(prompt, category = 'general') {
-        if (!this.isConfigured) {
-            throw new Error('AI Agent not configured. Please add your OpenAI API key in settings.');
-        }
-
-        // Enhance prompt based on category
-        const enhancedPrompt = this.enhanceImagePrompt(prompt, category);
-
-        try {
-            const response = await fetch('https://api.openai.com/v1/images/generations', {
+            const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: 'dall-e-3',
-                    prompt: enhancedPrompt,
-                    n: 1,
-                    size: '1024x1024',
-                    quality: 'standard'
+                    inputs: 'Test',
+                    parameters: { max_new_tokens: 5 }
                 })
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error?.message || 'Image generation failed');
+                throw new Error('Connection failed');
             }
 
-            const data = await response.json();
+            return { success: true };
+        } catch (err) {
+            console.error('Hugging Face connection test failed:', err);
+            return { success: false, error: err.message };
+        }
+    },
+
+    // Generate image using Pollinations.ai (No API key required)
+    async generateImage(prompt, category = 'general') {
+        // Enhance prompt based on category
+        const enhancedPrompt = this.enhanceImagePrompt(prompt, category);
+
+        try {
+            // Pollinations.ai - free, no API key needed
+            const encodedPrompt = encodeURIComponent(enhancedPrompt);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`;
+            
+            // Download the image
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            
             return {
                 success: true,
-                imageUrl: data.data[0].url,
-                revisedPrompt: data.data[0].revised_prompt
+                imageUrl: blobUrl,
+                revisedPrompt: enhancedPrompt,
+                blob: blob
             };
         } catch (err) {
             console.error('Image generation failed:', err);
@@ -88,48 +78,62 @@ const AIAgentManager = {
         }
     },
 
-    // Chat completion using GPT-4
+    // Download image from URL and convert to Blob (for compatibility)
+    async downloadImageAsBlob(imageUrl) {
+        // If imageUrl is already a blob URL, fetch it
+        if (imageUrl.startsWith('blob:')) {
+            const response = await fetch(imageUrl);
+            return await response.blob();
+        }
+        
+        // Otherwise, it's a regular URL
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            return blob;
+        } catch (err) {
+            console.error('Failed to download image:', err);
+            throw new Error('No se pudo descargar la imagen generada');
+        }
+    },
+
+    // Chat completion using Mistral-7B
     async chat(userMessage, context = null) {
         if (!this.isConfigured) {
-            throw new Error('AI Agent not configured. Please add your OpenAI API key in settings.');
+            throw new Error('AI Agent not configured. Please add your Hugging Face API key in settings.');
         }
 
         try {
-            const messages = [
-                {
-                    role: 'system',
-                    content: this.getSystemPrompt(context)
-                },
-                {
-                    role: 'user',
-                    content: userMessage
-                }
-            ];
+            const systemPrompt = this.getSystemPrompt(context);
+            const fullPrompt = `<s>[INST] ${systemPrompt} [/INST]\nUser: ${userMessage}\nAssistant:`;
 
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: 'gpt-3.5-turbo',
-                    messages: messages,
-                    max_tokens: 1000,
-                    temperature: 0.7
+                    inputs: fullPrompt,
+                    parameters: {
+                        max_new_tokens: 1000,
+                        temperature: 0.7,
+                        return_full_text: false
+                    }
                 })
             });
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error?.message || 'Chat completion failed');
+                throw new Error(error.error || 'Chat completion failed');
             }
 
             const data = await response.json();
+            const message = Array.isArray(data) ? data[0].generated_text : data.generated_text;
+            
             return {
                 success: true,
-                message: data.choices[0].message.content,
-                usage: data.usage
+                message: message.trim()
             };
         } catch (err) {
             console.error('Chat completion failed:', err);

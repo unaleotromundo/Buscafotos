@@ -328,7 +328,7 @@ const DOM = {
     
     // AI Settings
     aiSettingsForm: document.getElementById('ai-settings-form'),
-    openaiKeyInput: document.getElementById('openai-key'),
+    huggingfaceKeyInput: document.getElementById('huggingface-key'),
     btnTestAI: document.getElementById('btn-test-ai'),
     btnSaveAI: document.getElementById('btn-save-ai'),
     aiConnStatus: document.getElementById('ai-conn-status'),
@@ -1320,10 +1320,10 @@ function handleSettingsTabSwitch(e) {
 
 // Test AI connection
 async function handleTestAIConnection() {
-    const apiKey = DOM.openaiKeyInput.value.trim();
+    const apiKey = DOM.huggingfaceKeyInput.value.trim();
     
     if (!apiKey) {
-        alert('Por favor ingresa tu API Key de OpenAI.');
+        alert('Por favor ingresa tu API Key de Hugging Face.');
         return;
     }
 
@@ -1334,17 +1334,20 @@ async function handleTestAIConnection() {
     const tempManager = { apiKey: apiKey };
     
     try {
-        const response = await fetch('https://api.openai.com/v1/models', {
-            method: 'GET',
+        const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
+            method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({
+                inputs: 'Test',
+                parameters: { max_new_tokens: 5 }
+            })
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || 'Connection failed');
+            throw new Error('Connection failed');
         }
 
         DOM.aiConnStatus.querySelector('.status-msg').textContent = '✓ Conexión exitosa';
@@ -1360,10 +1363,10 @@ async function handleTestAIConnection() {
 async function handleSaveAISettings(e) {
     e.preventDefault();
     
-    const apiKey = DOM.openaiKeyInput.value.trim();
+    const apiKey = DOM.huggingfaceKeyInput.value.trim();
     
     if (!apiKey) {
-        alert('Por favor ingresa tu API Key de OpenAI.');
+        alert('Por favor ingresa tu API Key de Hugging Face.');
         return;
     }
 
@@ -1393,7 +1396,7 @@ function openAIChat() {
     
     // Load saved API key if exists
     if (AIAgentManager.apiKey) {
-        DOM.openaiKeyInput.value = AIAgentManager.apiKey;
+        DOM.huggingfaceKeyInput.value = AIAgentManager.apiKey;
     }
 }
 
@@ -1425,7 +1428,7 @@ async function handleChatSubmit(e) {
 
     // Check if AI is configured
     if (!AIAgentManager.isConfigured) {
-        addChatMessage('ai', 'Por favor configura tu API Key de OpenAI en Configuración > Agentes IA para usar el chat.');
+        addChatMessage('ai', 'Por favor configura tu API Key de Hugging Face en Configuración > Agentes IA para usar el chat.');
         return;
     }
 
@@ -1459,7 +1462,7 @@ async function handleQuickAction(e) {
     const action = e.currentTarget.getAttribute('data-action');
     
     if (!AIAgentManager.isConfigured) {
-        addChatMessage('ai', 'Por favor configura tu API Key de OpenAI en Configuración > Agentes IA para usar esta función.');
+        addChatMessage('ai', 'Por favor configura tu API Key de Hugging Face en Configuración > Agentes IA para usar esta función.');
         return;
     }
 
@@ -1567,12 +1570,7 @@ function addChatMessage(type, content, isHTML = false) {
 
 // Handle AI Generate in Upload Form
 async function handleAIGenerateInForm() {
-    // Check if AI is configured
-    if (!AIAgentManager.isConfigured) {
-        alert('Por favor configura tu API Key de OpenAI en Configuración > Agentes IA para generar imágenes.');
-        return;
-    }
-
+    // Image generation works without API key (Pollinations.ai)
     const category = DOM.inputCategory.value;
     if (!category) {
         alert('Por favor selecciona una categoría primero.');
@@ -1591,8 +1589,8 @@ async function handleAIGenerateInForm() {
 
         const response = await AIAgentManager.generateImage(prompt, category);
         
-        // Download and convert to blob
-        const imageBlob = await AIAgentManager.downloadImageAsBlob(response.imageUrl);
+        // Image is already downloaded as blob
+        const imageBlob = response.blob;
         
         // Create file object from blob
         const fileName = `ai-generated-${Date.now()}.png`;
