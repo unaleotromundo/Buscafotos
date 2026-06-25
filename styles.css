@@ -237,6 +237,17 @@ body {
     transition: var(--transition-normal);
 }
 
+.logo-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+    transition: opacity var(--transition-fast);
+}
+
+.logo-link:hover {
+    opacity: 0.8;
+}
+
 .logo-text p {
     font-size: 0.9rem;
     color: var(--text-secondary);
